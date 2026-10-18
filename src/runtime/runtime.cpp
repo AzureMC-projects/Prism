@@ -5,6 +5,7 @@
 #include <fstream>
 #include "logger.h"
 #include "plugin_manager.h"
+#include "overlay.h"
 
 extern "C" __declspec(dllexport) bool __cdecl PrismInitialize() noexcept;
 
@@ -79,6 +80,7 @@ extern "C" __declspec(dllexport) bool __cdecl PrismInitialize() noexcept {
       manager->load_directory(install_root() / L"mods");
     }
     g_manager = manager;
+    prism::detail::start_overlay(install_root(), data_directory());
     prism::detail::log(prism::detail::LogLevel::info, "Prism runtime initialization finished.");
     return true;
   } catch (...) {
