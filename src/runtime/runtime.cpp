@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <DbgHelp.h>
+#include <cwchar>
 #include <filesystem>
 #include <fstream>
 #include "logger.h"
