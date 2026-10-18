@@ -1,6 +1,9 @@
 #include "overlay.h"
 #include "logger.h"
 #include <Windows.h>
+#include <windowsx.h>
+#include <shellapi.h>
+#include <cwchar>
 #include <algorithm>
 #include <filesystem>
 #include <string>
