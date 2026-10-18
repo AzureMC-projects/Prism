@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -26,6 +26,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist\Prism\mods | Out-Null
+          Copy-Item build\Release\PrismLauncher.exe dist\Prism\
           Copy-Item build\Release\PrismRuntime.dll dist\Prism\
           Copy-Item build\Release\PrismHelloMod.dll dist\Prism\mods\
           Copy-Item include\prism\mod_api.h dist\Prism\
