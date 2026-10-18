@@ -10,7 +10,7 @@
 
 namespace {
 constexpr int kPath = 1001, kBrowse = 1002, kLaunch = 1003;
-constexpr int kMods = 1004, kToggle = 1005, kRefresh = 1006, kOpenLogs = 1007;
+constexpr int kMods = 1004, kToggle = 1005, kRefresh = 1006, kOpenLogs = 1007, kClearSafe = 1008;
 HWND g_path{}, g_mod_list{};
 std::vector<std::filesystem::path> g_mod_paths;
 
@@ -23,9 +23,14 @@ std::wstring module_directory() {
 std::filesystem::path mods_directory() {
   return std::filesystem::path(module_directory()) / L"mods";
 }
+std::filesystem::path data_directory() {
+  wchar_t local[MAX_PATH]{};
+  const DWORD n = GetEnvironmentVariableW(L"LOCALAPPDATA", local, MAX_PATH);
+  if (n == 0 || n >= MAX_PATH) return std::filesystem::current_path() / L"Prism";
+  return std::filesystem::path(local) / L"Prism";
+}
 bool is_disabled_mod(const std::filesystem::path& p) {
-  return p.extension() == L".disabled" &&
-      p.stem().extension() == L".dll";
+  return p.extension() == L".disabled" && p.stem().extension() == L".dll";
 }
 void refresh_mods() {
   SendMessageW(g_mod_list, LB_RESETCONTENT, 0, 0);
@@ -130,6 +135,12 @@ void toggle_selected_mod() {
   }
   refresh_mods();
 }
+void clear_safe_mode() {
+  std::error_code ec;
+  const bool removed = std::filesystem::remove(data_directory() / L"safe-mode.flag", ec);
+  if (ec) show_error(L"Could not clear safe mode. Check the permissions of your local Prism data folder.");
+  else MessageBoxW(nullptr, removed ? L"Safe mode cleared. Mods will be attempted on the next game launch." : L"Safe mode is not currently active.", L"Prism", MB_OK | MB_ICONINFORMATION);
+}
 void launch_and_inject() {
   wchar_t game[MAX_PATH]{};
   GetWindowTextW(g_path, game, MAX_PATH);
@@ -164,11 +175,7 @@ void launch_and_inject() {
   else MessageBoxW(nullptr, L"PrismRuntime was loaded into the game process. This confirms DLL loading only; game compatibility and in-game features are not yet verified.", L"Prism", MB_OK | MB_ICONINFORMATION);
 }
 void open_logs() {
-  wchar_t local[MAX_PATH]{};
-  const DWORD n = GetEnvironmentVariableW(L"LOCALAPPDATA", local, MAX_PATH);
-  const auto logs = (n > 0 && n < MAX_PATH)
-      ? std::filesystem::path(local) / L"Prism" / L"logs"
-      : std::filesystem::current_path();
+  const auto logs = data_directory() / L"logs";
   std::error_code ec;
   std::filesystem::create_directories(logs, ec);
   ShellExecuteW(nullptr, L"open", logs.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
@@ -185,7 +192,8 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     CreateWindowW(L"BUTTON", L"Enable / Disable Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 304, 220, 30, hwnd, reinterpret_cast<HMENU>(kToggle), nullptr, nullptr);
     CreateWindowW(L"BUTTON", L"Refresh", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 254, 304, 100, 30, hwnd, reinterpret_cast<HMENU>(kRefresh), nullptr, nullptr);
     CreateWindowW(L"BUTTON", L"Open Logs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 364, 304, 122, 30, hwnd, reinterpret_cast<HMENU>(kOpenLogs), nullptr, nullptr);
-    CreateWindowW(L"STATIC", L"Native runtime foundation. In-game UI and game compatibility are not yet verified.", WS_CHILD | WS_VISIBLE, 24, 350, 480, 32, hwnd, nullptr, nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Clear Safe Mode", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 346, 462, 30, hwnd, reinterpret_cast<HMENU>(kClearSafe), nullptr, nullptr);
+    CreateWindowW(L"STATIC", L"Native runtime foundation. In-game UI and game compatibility are not yet verified.", WS_CHILD | WS_VISIBLE, 24, 388, 480, 32, hwnd, nullptr, nullptr, nullptr);
     refresh_mods();
     return 0;
   }
@@ -196,6 +204,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
       case kToggle: toggle_selected_mod(); return 0;
       case kRefresh: refresh_mods(); return 0;
       case kOpenLogs: open_logs(); return 0;
+      case kClearSafe: clear_safe_mode(); return 0;
     }
   }
   if (msg == WM_DESTROY) { PostQuitMessage(0); return 0; }
@@ -213,7 +222,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
   if (!RegisterClassW(&wc)) return 1;
   HWND hwnd = CreateWindowExW(0, cls, L"Prism — Geometry Dash Mod Loader", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-      CW_USEDEFAULT, CW_USEDEFAULT, 530, 435, nullptr, nullptr, instance, nullptr);
+      CW_USEDEFAULT, CW_USEDEFAULT, 530, 475, nullptr, nullptr, instance, nullptr);
   if (!hwnd) return 1;
   ShowWindow(hwnd, show);
   UpdateWindow(hwnd);
