@@ -19,6 +19,12 @@ target_compile_definitions(prism_runtime PRIVATE PRISM_RUNTIME_EXPORTS WIN32_LEA
 target_compile_options(prism_runtime PRIVATE /W4 /permissive- /EHsc)
 set_target_properties(prism_runtime PROPERTIES OUTPUT_NAME "PrismRuntime")
 
+add_executable(prism_launcher WIN32 src/launcher/main.cpp)
+target_compile_definitions(prism_launcher PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_options(prism_launcher PRIVATE /W4 /permissive- /EHsc)
+target_link_libraries(prism_launcher PRIVATE comdlg32)
+set_target_properties(prism_launcher PROPERTIES OUTPUT_NAME "PrismLauncher")
+
 add_library(prism_sample_mod SHARED examples/hello_mod.cpp)
 target_include_directories(prism_sample_mod PRIVATE include)
 target_compile_definitions(prism_sample_mod PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
@@ -33,7 +39,7 @@ if(BUILD_TESTING)
   add_test(NAME prism_api_tests COMMAND prism_api_tests)
 endif()
 
-install(TARGETS prism_runtime prism_sample_mod
+install(TARGETS prism_runtime prism_launcher prism_sample_mod
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION bin
   ARCHIVE DESTINATION lib
