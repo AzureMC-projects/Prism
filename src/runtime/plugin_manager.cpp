@@ -1,6 +1,6 @@
 #include "plugin_manager.h"
 #include "logger.h"
-#include <algorithm>
+#include <exception>
 #include <set>
 #include <string>
 
