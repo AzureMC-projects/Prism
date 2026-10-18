@@ -24,7 +24,7 @@ Prism is a Windows-native mod-loader project for Geometry Dash 2.209, built arou
 
 ## Install into Geometry Dash
 
-The installer targets the **folder containing GeometryDash.exe** and installs `version.dll` and XInput startup proxies, Prism runtime, and a sample mod. After installation, start Geometry Dash normally through Steam; no separate launcher is intended to be required. Prism attempts to show a small `P` button over the game window. Press **F10** to toggle the menu. The overlay provides a mod list, enable/disable-by-file-rename controls, and shortcuts to the mods/log folders. Mod state changes apply after restarting the game.
+The installer targets the **folder containing GeometryDash.exe** and installs `version.dll` and XInput startup proxies, Prism runtime, and a sample mod. After installation, start Geometry Dash normally through Steam; no separate launcher is intended to be required. Prism attempts to show a small `P` button over the game window. Press **F10** to toggle the menu. The overlay provides a mod list, enable/disable-by-file-rename controls, shortcuts to the mods/log folders, and an **Update** action. The updater downloads the official latest-release installer, waits for Geometry Dash to close, and runs the installer with elevation. Updates require a published GitHub release. Mod state changes apply after restarting the game.
 
 **Compatibility note:** this startup mechanism uses local Windows DLL proxies (`version.dll`, `xinput1_3.dll`, and `xinput1_4.dll`). The game must import at least one of those libraries for the bootstrap to run. If any of those proxy filenames already exists in the game folder, the installer refuses to overwrite it because two proxy loaders can conflict. The overlay is a native topmost window aligned over the game, not a hook into Geometry Dash's internal Cocos rendering engine. Test it against your game build and report issues before relying on it.
 
@@ -46,6 +46,6 @@ See [BUILDING.md](docs/BUILDING.md), [architecture](docs/ARCHITECTURE.md), and [
 
 ## Important limitations
 
-The overlay prototype is a topmost transparent Windows window, not a hook into the game's Cocos renderer. The `version.dll` startup proxy only runs if the game loads that Windows library; verify automatic startup on your installation. Automatic updates, polished mod discovery, and end-to-end testing against a real Geometry Dash 2.209 installation remain outstanding.
+The overlay prototype is a topmost transparent Windows window, not a hook into the game's Cocos renderer. The `version.dll` startup proxy only runs if the game loads that Windows library; verify automatic startup on your installation. Fully unattended updates, polished mod discovery, and end-to-end testing against a real Geometry Dash 2.209 installation remain outstanding.
 
 Native mods are arbitrary code running with the game's privileges. Install only mods you trust. Prism is not affiliated with or endorsed by RobTop Games.
