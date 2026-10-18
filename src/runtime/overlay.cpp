@@ -105,12 +105,14 @@ void draw_overlay(HDC dc, int width, int height) {
     text(dc, left + 22, listTop + visibleRows * rowH + 2, L"More mods exist; manage them from the mods folder.", kMuted, 11);
 
   const int bottom = top + panelH - 52;
-  fill(dc, RECT{left + 18, bottom, left + 176, bottom + 34}, kAccent, 8);
-  text(dc, left + 32, bottom + 8, L"Enable / Disable", kText, 13, FW_BOLD);
-  fill(dc, RECT{left + 186, bottom, left + 314, bottom + 34}, kPanelLight, 8);
-  text(dc, left + 200, bottom + 8, L"Open mod folder", kText, 12, FW_BOLD);
-  fill(dc, RECT{left + 324, bottom, left + 452, bottom + 34}, kPanelLight, 8);
-  text(dc, left + 338, bottom + 8, L"Open logs", kText, 12, FW_BOLD);
+  fill(dc, RECT{left + 18, bottom, left + 158, bottom + 34}, kAccent, 8);
+  text(dc, left + 27, bottom + 8, L"Enable / Disable", kText, 12, FW_BOLD);
+  fill(dc, RECT{left + 166, bottom, left + 274, bottom + 34}, kPanelLight, 8);
+  text(dc, left + 176, bottom + 8, L"Mods folder", kText, 12, FW_BOLD);
+  fill(dc, RECT{left + 282, bottom, left + 382, bottom + 34}, kPanelLight, 8);
+  text(dc, left + 300, bottom + 8, L"Open logs", kText, 12, FW_BOLD);
+  fill(dc, RECT{left + 390, bottom, left + 536, bottom + 34}, kPanelLight, 8);
+  text(dc, left + 399, bottom + 8, L"Clear safe mode", kText, 12, FW_BOLD);
   text(dc, left + 22, top + panelH - 12, L"Mod changes apply next game launch. Only use mods you trust.", kMuted, 11);
 }
 BOOL CALLBACK find_game_window(HWND hwnd, LPARAM data) {
@@ -156,7 +158,7 @@ LRESULT CALLBACK overlay_proc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp) {
       sync_position();
       return 0;
     }
-    case WM_MOUSEACTIVATE: return MA_ACTIVATE;
+    case WM_MOUSEACTIVATE: return MA_NOACTIVATE;
     case WM_LBUTTONDOWN: {
       const int x = GET_X_LPARAM(lp), y = GET_Y_LPARAM(lp);
       RECT client{}; GetClientRect(hwnd, &client);
@@ -178,12 +180,17 @@ LRESULT CALLBACK overlay_proc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp) {
             g_mods = enumerate_mods();
             g_selected = index < static_cast<int>(g_mods.size()) ? index : -1;
           } else if (y >= top + panelH - 52 && y <= top + panelH - 18) {
-            if (x >= left + 18 && x <= left + 176) toggle_mod();
-            else if (x >= left + 186 && x <= left + 314)
+            if (x >= left + 18 && x <= left + 158) toggle_mod();
+            else if (x >= left + 166 && x <= left + 274)
               ShellExecuteW(nullptr, L"open", (g_install_root / L"mods").c_str(), nullptr, nullptr, SW_SHOWNORMAL);
-            else if (x >= left + 324 && x <= left + 452) {
+            else if (x >= left + 282 && x <= left + 382) {
               std::error_code ec; std::filesystem::create_directories(g_data_root / L"logs", ec);
               ShellExecuteW(nullptr, L"open", (g_data_root / L"logs").c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+            } else if (x >= left + 390 && x <= left + 536) {
+              std::error_code ec;
+              std::filesystem::remove(g_data_root / L"safe-mode.flag", ec);
+              if (ec) log(LogLevel::warning, "Could not clear Prism safe-mode marker.");
+              else log(LogLevel::info, "Safe mode marker cleared from the in-game menu.");
             }
           }
         }
@@ -199,7 +206,7 @@ LRESULT CALLBACK overlay_proc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp) {
       EndPaint(hwnd, &ps);
       return 0;
     }
-    case WM_DESTROY: KillTimer(hwnd, kTimer); g_overlay = nullptr; return 0;
+    case WM_DESTROY: KillTimer(hwnd, kTimer); g_overlay = nullptr; PostQuitMessage(0); return 0;
   }
   return DefWindowProcW(hwnd, message, wp, lp);
 }
