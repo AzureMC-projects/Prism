@@ -26,7 +26,6 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist\Prism\mods | Out-Null
-          Copy-Item build\Release\PrismLauncher.exe dist\Prism\
           Copy-Item build\Release\PrismRuntime.dll dist\Prism\
           Copy-Item build\Release\version.dll dist\Prism\
           Copy-Item assets\PrismBootstrap.installed dist\Prism\
