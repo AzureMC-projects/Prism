@@ -4,7 +4,7 @@
 
 Prism is a Windows-native mod-loader project for Geometry Dash 2.209, built around a C++ runtime, native mod API, diagnostic recovery, and Windows packaging.
 
-> **Status:** Early implementation. The native loader foundation, sample mod, launcher, brand assets, and installer pipeline are in progress. The in-game menu/render integration, reliable compatibility with Geometry Dash 2.209, automatic updates, and full end-to-end testing are not complete. Do not treat this as a stable release.
+> **Status:** Early implementation. The native loader foundation, sample mod, bootstrap, overlay prototype, brand assets, and installer pipeline are implemented in source, but have not yet been verified end-to-end against Geometry Dash 2.209. Automatic updates and reliable game compatibility remain incomplete. Do not treat this as a stable release.
 
 ## Brand assets
 
@@ -46,6 +46,6 @@ See [BUILDING.md](docs/BUILDING.md), [architecture](docs/ARCHITECTURE.md), and [
 
 ## Important limitations
 
-The current runtime does not yet hook game rendering or expose an in-game mod menu/button. Automatic updates, polished mod discovery, and end-to-end testing against a real Geometry Dash 2.209 installation remain outstanding. The loader's injection path is best-effort and must be verified on the target machine.
+The overlay prototype is a topmost transparent Windows window, not a hook into the game's Cocos renderer. The `version.dll` startup proxy only runs if the game loads that Windows library; verify automatic startup on your installation. Automatic updates, polished mod discovery, and end-to-end testing against a real Geometry Dash 2.209 installation remain outstanding.
 
 Native mods are arbitrary code running with the game's privileges. Install only mods you trust. Prism is not affiliated with or endorsed by RobTop Games.
