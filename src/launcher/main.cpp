@@ -3,19 +3,47 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <commdlg.h>
+#include <shellapi.h>
 #include <filesystem>
 #include <string>
 #include <vector>
 
 namespace {
 constexpr int kPath = 1001, kBrowse = 1002, kLaunch = 1003;
-HWND g_path{};
+constexpr int kMods = 1004, kToggle = 1005, kRefresh = 1006, kOpenLogs = 1007;
+HWND g_path{}, g_mod_list{};
+std::vector<std::filesystem::path> g_mod_paths;
 
 std::wstring module_directory() {
   wchar_t buffer[MAX_PATH]{};
   const DWORD n = GetModuleFileNameW(nullptr, buffer, MAX_PATH);
   if (!n || n >= MAX_PATH) return std::filesystem::current_path().wstring();
   return std::filesystem::path(buffer).parent_path().wstring();
+}
+std::filesystem::path mods_directory() {
+  return std::filesystem::path(module_directory()) / L"mods";
+}
+bool is_disabled_mod(const std::filesystem::path& p) {
+  return p.extension() == L".disabled" &&
+      p.stem().extension() == L".dll";
+}
+void refresh_mods() {
+  SendMessageW(g_mod_list, LB_RESETCONTENT, 0, 0);
+  g_mod_paths.clear();
+  try {
+    std::filesystem::create_directories(mods_directory());
+    for (const auto& e : std::filesystem::directory_iterator(mods_directory())) {
+      if (!e.is_regular_file()) continue;
+      const auto p = e.path();
+      const bool enabled = p.extension() == L".dll";
+      if (!enabled && !is_disabled_mod(p)) continue;
+      g_mod_paths.push_back(p);
+      const std::wstring label = (enabled ? L"[ON]  " : L"[OFF] ") + p.filename().wstring();
+      SendMessageW(g_mod_list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(label.c_str()));
+    }
+  } catch (...) {
+    MessageBoxW(nullptr, L"Could not read the mods directory.", L"Prism", MB_OK | MB_ICONWARNING);
+  }
 }
 DWORD find_game_process() {
   HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -80,6 +108,28 @@ void browse_game() {
   ofn.lpstrTitle = L"Select GeometryDash.exe";
   if (GetOpenFileNameW(&ofn)) SetWindowTextW(g_path, path);
 }
+void toggle_selected_mod() {
+  const LRESULT selected = SendMessageW(g_mod_list, LB_GETCURSEL, 0, 0);
+  if (selected == LB_ERR || static_cast<size_t>(selected) >= g_mod_paths.size()) {
+    MessageBoxW(nullptr, L"Select a mod first.", L"Prism", MB_OK | MB_ICONINFORMATION);
+    return;
+  }
+  const auto source = g_mod_paths[static_cast<size_t>(selected)];
+  std::filesystem::path destination;
+  if (source.extension() == L".dll") destination = source.wstring() + L".disabled";
+  else {
+    std::wstring name = source.wstring();
+    name.resize(name.size() - std::wstring(L".disabled").size());
+    destination = name;
+  }
+  std::error_code ec;
+  std::filesystem::rename(source, destination, ec);
+  if (ec) {
+    show_error(L"Could not change mod state. Close any program using the file and try again.");
+    return;
+  }
+  refresh_mods();
+}
 void launch_and_inject() {
   wchar_t game[MAX_PATH]{};
   GetWindowTextW(g_path, game, MAX_PATH);
@@ -99,15 +149,13 @@ void launch_and_inject() {
     PROCESS_INFORMATION pi{};
     if (!CreateProcessW(game, nullptr, nullptr, nullptr, FALSE, 0, nullptr,
         std::filesystem::path(game).parent_path().c_str(), &si, &pi)) {
-      show_error(L"Could not start Geometry Dash. Start it normally through Steam, then try again.\n\nIf the game is already running, Prism will try to find it again.");
-      pid = find_game_process();
-      if (!pid) return;
-    } else {
-      pid = pi.dwProcessId;
-      launched = pi.hProcess;
-      CloseHandle(pi.hThread);
-      Sleep(5000);
+      show_error(L"Could not start Geometry Dash. Start it normally through Steam, then click Launch / Load Prism.");
+      return;
     }
+    pid = pi.dwProcessId;
+    launched = pi.hProcess;
+    CloseHandle(pi.hThread);
+    Sleep(5000);
   }
   std::wstring error;
   const bool ok = inject_runtime(pid, runtime.wstring(), error);
@@ -115,20 +163,39 @@ void launch_and_inject() {
   if (!ok) show_error(error);
   else MessageBoxW(nullptr, L"PrismRuntime was loaded into the game process. This confirms DLL loading only; game compatibility and in-game features are not yet verified.", L"Prism", MB_OK | MB_ICONINFORMATION);
 }
+void open_logs() {
+  wchar_t local[MAX_PATH]{};
+  const DWORD n = GetEnvironmentVariableW(L"LOCALAPPDATA", local, MAX_PATH);
+  const auto logs = (n > 0 && n < MAX_PATH)
+      ? std::filesystem::path(local) / L"Prism" / L"logs"
+      : std::filesystem::current_path();
+  std::error_code ec;
+  std::filesystem::create_directories(logs, ec);
+  ShellExecuteW(nullptr, L"open", logs.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+}
 LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   if (msg == WM_CREATE) {
-    CreateWindowW(L"STATIC", L"Prism", WS_CHILD | WS_VISIBLE, 24, 18, 340, 34, hwnd, nullptr, nullptr, nullptr);
-    CreateWindowW(L"STATIC", L"Geometry Dash executable", WS_CHILD | WS_VISIBLE, 24, 64, 340, 22, hwnd, nullptr, nullptr, nullptr);
-    g_path = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 24, 88, 350, 28, hwnd, reinterpret_cast<HMENU>(kPath), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Browse…", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 386, 88, 100, 28, hwnd, reinterpret_cast<HMENU>(kBrowse), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Launch / Load Prism", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 136, 462, 38, hwnd, reinterpret_cast<HMENU>(kLaunch), nullptr, nullptr);
-    CreateWindowW(L"STATIC", L"Native runtime foundation — game features are under development.", WS_CHILD | WS_VISIBLE, 24, 192, 462, 30, hwnd, nullptr, nullptr, nullptr);
+    CreateWindowW(L"STATIC", L"Prism", WS_CHILD | WS_VISIBLE, 24, 14, 340, 34, hwnd, nullptr, nullptr, nullptr);
+    CreateWindowW(L"STATIC", L"Geometry Dash executable", WS_CHILD | WS_VISIBLE, 24, 52, 340, 22, hwnd, nullptr, nullptr, nullptr);
+    g_path = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 24, 76, 350, 26, hwnd, reinterpret_cast<HMENU>(kPath), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Browse…", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 386, 76, 100, 26, hwnd, reinterpret_cast<HMENU>(kBrowse), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Launch / Load Prism", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 112, 462, 34, hwnd, reinterpret_cast<HMENU>(kLaunch), nullptr, nullptr);
+    CreateWindowW(L"STATIC", L"Mods (rename .dll to .dll.disabled to disable)", WS_CHILD | WS_VISIBLE, 24, 158, 462, 20, hwnd, nullptr, nullptr, nullptr);
+    g_mod_list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"", WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY, 24, 180, 462, 112, hwnd, reinterpret_cast<HMENU>(kMods), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Enable / Disable Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 304, 220, 30, hwnd, reinterpret_cast<HMENU>(kToggle), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Refresh", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 254, 304, 100, 30, hwnd, reinterpret_cast<HMENU>(kRefresh), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Open Logs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 364, 304, 122, 30, hwnd, reinterpret_cast<HMENU>(kOpenLogs), nullptr, nullptr);
+    CreateWindowW(L"STATIC", L"Native runtime foundation. In-game UI and game compatibility are not yet verified.", WS_CHILD | WS_VISIBLE, 24, 350, 480, 32, hwnd, nullptr, nullptr, nullptr);
+    refresh_mods();
     return 0;
   }
   if (msg == WM_COMMAND) {
     switch (LOWORD(wp)) {
       case kBrowse: browse_game(); return 0;
       case kLaunch: launch_and_inject(); return 0;
+      case kToggle: toggle_selected_mod(); return 0;
+      case kRefresh: refresh_mods(); return 0;
+      case kOpenLogs: open_logs(); return 0;
     }
   }
   if (msg == WM_DESTROY) { PostQuitMessage(0); return 0; }
@@ -146,7 +213,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
   if (!RegisterClassW(&wc)) return 1;
   HWND hwnd = CreateWindowExW(0, cls, L"Prism — Geometry Dash Mod Loader", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-      CW_USEDEFAULT, CW_USEDEFAULT, 530, 280, nullptr, nullptr, instance, nullptr);
+      CW_USEDEFAULT, CW_USEDEFAULT, 530, 435, nullptr, nullptr, instance, nullptr);
   if (!hwnd) return 1;
   ShowWindow(hwnd, show);
   UpdateWindow(hwnd);
