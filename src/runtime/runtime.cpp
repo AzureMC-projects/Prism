@@ -5,7 +5,8 @@
 #include "plugin_manager.h"
 
 namespace {
-std::unique_ptr<prism::detail::PluginManager> g_manager;
+prism::detail::PluginManager* g_manager = nullptr;
+
 std::filesystem::path install_root() {
   HMODULE self{};
   if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
@@ -18,31 +19,40 @@ std::filesystem::path install_root() {
   if (n == 0 || n >= MAX_PATH) return std::filesystem::current_path() / L"Prism";
   return std::filesystem::path(path).parent_path();
 }
+DWORD WINAPI initialize_worker(void*) {
+  PrismInitialize();
+  return 0;
+}
 }
 
 extern "C" __declspec(dllexport) bool __cdecl PrismInitialize() noexcept {
   try {
     if (g_manager) return true;
     prism::detail::log(prism::detail::LogLevel::info, "Prism runtime initialization started.");
-    g_manager = std::make_unique<prism::detail::PluginManager>();
-    g_manager->load_directory(install_root() / L"mods");
+    auto* manager = new prism::detail::PluginManager();
+    manager->load_directory(install_root() / L"mods");
+    g_manager = manager;
     prism::detail::log(prism::detail::LogLevel::info, "Prism runtime initialization finished.");
     return true;
   } catch (...) {
     prism::detail::log(prism::detail::LogLevel::error, "Prism runtime initialization failed.");
-    g_manager.reset();
     return false;
   }
 }
 
 extern "C" __declspec(dllexport) void __cdecl PrismShutdown() noexcept {
-  g_manager.reset();
+  auto* manager = g_manager;
+  g_manager = nullptr;
+  delete manager;
 }
 
-BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID) {
-  // No complex work under the loader lock.
-  if (reason == DLL_PROCESS_DETACH) {
-    // Explicit PrismShutdown is preferred; static destruction is not performed here.
+BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
+  if (reason == DLL_PROCESS_ATTACH) {
+    DisableThreadLibraryCalls(instance);
+    HANDLE worker = CreateThread(nullptr, 0, initialize_worker, nullptr, 0, nullptr);
+    if (worker) CloseHandle(worker);
   }
+  // Do not unload mods or wait on threads while holding the Windows loader lock.
+  // Process teardown reclaims resources; PrismShutdown is available for orderly shutdown.
   return TRUE;
 }
