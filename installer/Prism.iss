@@ -13,7 +13,7 @@ OutputDir=Output
 OutputBaseFilename=Prism-Setup
 ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=admin
-UninstallDisplayIcon={app}\PrismLauncher.exe
+UninstallDisplayIcon={app}\version.dll
 WizardStyle=modern
 Compression=lzma2
 SolidCompression=yes
@@ -22,7 +22,6 @@ DirExistsWarning=no
 
 [Files]
 ; Install beside GeometryDash.exe. The local version.dll proxy attempts to load PrismRuntime at game startup.
-Source: "..\build\Release\PrismLauncher.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\PrismRuntime.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\version.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\assets\PrismBootstrap.installed"; DestDir: "{app}"; Flags: ignoreversion
@@ -32,13 +31,6 @@ Source: "..\README.md"; DestDir: "{app}\Prism-README.md"; Flags: ignoreversion
 Source: "..\docs\MOD_API.md"; DestDir: "{app}\PrismSDK"; Flags: ignoreversion
 Source: "..\docs\BUILDING.md"; DestDir: "{app}\PrismSDK"; Flags: ignoreversion
 Source: "..\assets\prism-icon.svg"; DestDir: "{app}\PrismAssets"; Flags: ignoreversion
-
-[Icons]
-Name: "{group}\Prism Mod Loader"; Filename: "{app}\PrismLauncher.exe"; IconFilename: "{app}\PrismLauncher.exe"
-Name: "{autodesktop}\Prism Mod Loader"; Filename: "{app}\PrismLauncher.exe"; IconFilename: "{app}\PrismLauncher.exe"; Tasks: desktopicon
-
-[Tasks]
-Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
 
 [Dirs]
 Name: "{app}\mods"
