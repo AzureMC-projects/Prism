@@ -24,6 +24,8 @@ DirExistsWarning=no
 ; Install beside GeometryDash.exe. The local version.dll proxy attempts to load PrismRuntime at game startup.
 Source: "..\build\Release\PrismRuntime.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\version.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\build\Release\xinput1_3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\build\Release\xinput1_4.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\assets\PrismBootstrap.installed"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\PrismHelloMod.dll"; DestDir: "{app}\mods"; Flags: ignoreversion
 Source: "..\include\prism\mod_api.h"; DestDir: "{app}\PrismSDK"; Flags: ignoreversion
@@ -53,9 +55,9 @@ begin
       MsgBox('Choose the Geometry Dash installation folder containing GeometryDash.exe. Prism installs its files beside the game executable.', mbError, MB_OK);
       Result := False;
     end
-    else if FileExists(ExpandConstant('{app}\version.dll')) and not FileExists(ExpandConstant('{app}\PrismBootstrap.installed')) then
+    else if (FileExists(ExpandConstant('{app}\version.dll')) or FileExists(ExpandConstant('{app}\xinput1_3.dll')) or FileExists(ExpandConstant('{app}\xinput1_4.dll'))) and not FileExists(ExpandConstant('{app}\PrismBootstrap.installed')) then
     begin
-      MsgBox('Another version.dll already exists in this game folder. Prism uses version.dll for automatic startup, so installing over it could break another mod loader. Remove or back up the existing loader first, then retry.', mbError, MB_OK);
+      MsgBox('A version.dll or XInput proxy already exists in this game folder. Prism uses these proxy names for automatic startup, so installing over one could break another mod loader. Remove or back up the existing proxy first, then retry.', mbError, MB_OK);
       Result := False;
     end;
   end;
