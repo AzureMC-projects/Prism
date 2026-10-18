@@ -28,6 +28,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist\Prism\mods | Out-Null
           Copy-Item build\Release\PrismRuntime.dll dist\Prism\
           Copy-Item build\Release\version.dll dist\Prism\
+          Copy-Item build\Release\xinput1_3.dll dist\Prism\
+          Copy-Item build\Release\xinput1_4.dll dist\Prism\
           Copy-Item assets\PrismBootstrap.installed dist\Prism\
           Copy-Item build\Release\PrismHelloMod.dll dist\Prism\mods\
           Copy-Item include\prism\mod_api.h dist\Prism\
