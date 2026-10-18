@@ -65,7 +65,7 @@ endforeach()
 add_executable(prism_updater WIN32 src/updater/main.cpp)
 target_compile_definitions(prism_updater PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_compile_options(prism_updater PRIVATE /W4 /permissive- /EHsc)
-target_link_libraries(prism_updater PRIVATE urlmon shell32)
+target_link_libraries(prism_updater PRIVATE urlmon shell32 ole32)
 set_target_properties(prism_updater PROPERTIES OUTPUT_NAME "PrismUpdater")
 
 add_library(prism_sample_mod SHARED examples/hello_mod.cpp)
