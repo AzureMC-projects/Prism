@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <objbase.h>
 #include <TlHelp32.h>
 #include <shellapi.h>
 #include <urlmon.h>
