@@ -48,6 +48,20 @@ target_compile_definitions(prism_bootstrap PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX 
 target_compile_options(prism_bootstrap PRIVATE /W4 /permissive- /EHsc)
 set_target_properties(prism_bootstrap PROPERTIES OUTPUT_NAME "version")
 
+foreach(xinput_version IN ITEMS 13 14)
+  if(xinput_version STREQUAL "13")
+    set(xinput_name "xinput1_3")
+    set(xinput_def src/bootstrap/xinput13_proxy.def)
+  else()
+    set(xinput_name "xinput1_4")
+    set(xinput_def src/bootstrap/xinput14_proxy.def)
+  endif()
+  add_library(prism_${xinput_name} SHARED src/bootstrap/xinput_proxy.cpp ${xinput_def})
+  target_compile_definitions(prism_${xinput_name} PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+  target_compile_options(prism_${xinput_name} PRIVATE /W4 /permissive- /EHsc)
+  set_target_properties(prism_${xinput_name} PROPERTIES OUTPUT_NAME "${xinput_name}")
+endforeach()
+
 add_library(prism_sample_mod SHARED examples/hello_mod.cpp)
 target_include_directories(prism_sample_mod PRIVATE include)
 target_compile_definitions(prism_sample_mod PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
@@ -62,7 +76,7 @@ if(BUILD_TESTING)
   add_test(NAME prism_api_tests COMMAND prism_api_tests)
 endif()
 
-install(TARGETS prism_runtime prism_launcher prism_sample_mod prism_bootstrap
+install(TARGETS prism_runtime prism_launcher prism_sample_mod prism_bootstrap prism_xinput1_3 prism_xinput1_4
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION bin
   ARCHIVE DESTINATION lib
