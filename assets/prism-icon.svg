@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<title id="title">Prism icon</title><desc id="desc">A faceted violet and cyan triangular prism.</desc>
+<defs><linearGradient id="a" x1="30" y1="220" x2="220" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#22D3EE"/><stop offset=".52" stop-color="#6366F1"/><stop offset="1" stop-color="#A855F7"/></linearGradient><linearGradient id="b" x1="68" y1="190" x2="188" y2="65" gradientUnits="userSpaceOnUse"><stop stop-color="#A5F3FC"/><stop offset="1" stop-color="#E9D5FF"/></linearGradient></defs>
+<path d="M128 16 239 216H17L128 16Z" fill="#0B1020" stroke="url(#a)" stroke-width="9" stroke-linejoin="round"/>
+<path d="M128 35 216 197H128V35Z" fill="url(#a)"/><path d="M128 35 40 197H128V35Z" fill="url(#b)"/><path d="M40 197 128 146 216 197H40Z" fill="#6366F1" opacity=".92"/>
+<path d="M128 35V146M40 197 128 146 216 197" fill="none" stroke="#F8FAFC" stroke-opacity=".72" stroke-width="4" stroke-linejoin="round"/>
+</svg>
