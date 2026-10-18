@@ -4,6 +4,8 @@
 #include "logger.h"
 #include "plugin_manager.h"
 
+extern "C" __declspec(dllexport) bool __cdecl PrismInitialize() noexcept;
+
 namespace {
 prism::detail::PluginManager* g_manager = nullptr;
 
