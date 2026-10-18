@@ -25,6 +25,8 @@ DirExistsWarning=no
 ; Setup copies files; it does not inject a DLL into a running process.
 Source: "..\build\Release\PrismLauncher.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\PrismRuntime.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\build\Release\version.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\assets\PrismBootstrap.installed"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\PrismHelloMod.dll"; DestDir: "{app}\mods"; Flags: ignoreversion
 Source: "..\include\prism\mod_api.h"; DestDir: "{app}\PrismSDK"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}\Prism-README.md"; Flags: ignoreversion
@@ -58,6 +60,11 @@ begin
     if not FileExists(ExpandConstant('{app}\GeometryDash.exe')) then
     begin
       MsgBox('Choose the Geometry Dash installation folder containing GeometryDash.exe. Prism installs its files beside the game executable.', mbError, MB_OK);
+      Result := False;
+    end
+    else if FileExists(ExpandConstant('{app}\version.dll')) and not FileExists(ExpandConstant('{app}\PrismBootstrap.installed')) then
+    begin
+      MsgBox('Another version.dll already exists in this game folder. Prism uses version.dll for automatic startup, so installing over it could break another mod loader. Remove or back up the existing loader first, then retry.', mbError, MB_OK);
       Result := False;
     end;
   end;
