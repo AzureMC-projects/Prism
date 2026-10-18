@@ -1,0 +1,10 @@
+LIBRARY xinput1_4
+EXPORTS
+  XInputGetState=PrismXInputGetState @1
+  XInputSetState=PrismXInputSetState @2
+  XInputGetCapabilities=PrismXInputGetCapabilities @3
+  XInputEnable=PrismXInputEnable @4
+  XInputGetDSoundAudioDeviceGuids=PrismXInputGetDSoundAudioDeviceGuids @5
+  XInputGetBatteryInformation=PrismXInputGetBatteryInformation @7
+  XInputGetKeystroke=PrismXInputGetKeystroke @8
+  XInputGetAudioDeviceIds=PrismXInputGetAudioDeviceIds @10

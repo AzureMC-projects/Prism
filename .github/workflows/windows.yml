@@ -1,0 +1,58 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main, "implementation/**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -A x64 -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Stage distribution
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist\Prism\mods | Out-Null
+          Copy-Item build\Release\PrismRuntime.dll dist\Prism\
+          Copy-Item build\Release\PrismUpdater.exe dist\Prism\
+          Copy-Item build\Release\version.dll dist\Prism\
+          Copy-Item build\Release\xinput1_3.dll dist\Prism\
+          Copy-Item build\Release\xinput1_4.dll dist\Prism\
+          Copy-Item assets\PrismBootstrap.installed dist\Prism\
+          Copy-Item build\Release\PrismHelloMod.dll dist\Prism\mods\
+          Copy-Item include\prism\mod_api.h dist\Prism\
+          Copy-Item README.md, docs\MOD_API.md, docs\BUILDING.md dist\Prism\
+          Compress-Archive -Path dist\Prism\* -DestinationPath dist\Prism-windows-x64.zip -Force
+      - name: Install Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
+        with:
+          path: installer\Prism.iss
+          options: /O+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prism-windows-x64
+          path: |
+            dist/Prism-windows-x64.zip
+            installer/Output/Prism-Setup.exe
+          if-no-files-found: warn
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Prism-windows-x64.zip
+            installer/Output/Prism-Setup.exe
