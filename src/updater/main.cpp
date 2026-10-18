@@ -9,6 +9,10 @@
 #pragma comment(lib, "shell32.lib")
 
 namespace {
+struct ComScope {
+  HRESULT result{CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)};
+  ~ComScope() { if (SUCCEEDED(result)) CoUninitialize(); }
+};
 bool game_is_running() {
   HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
   if (snapshot == INVALID_HANDLE_VALUE) return false;
@@ -30,6 +34,11 @@ std::filesystem::path local_data() {
 }
 }
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
+  ComScope com;
+  if (FAILED(com.result) && com.result != RPC_E_CHANGED_MODE) {
+    MessageBoxW(nullptr, L"Windows could not initialize the update service.", L"Prism Updater", MB_OK | MB_ICONERROR);
+    return 5;
+  }
   wchar_t module[MAX_PATH]{};
   const DWORD n = GetModuleFileNameW(nullptr, module, MAX_PATH);
   if (!n || n >= MAX_PATH) {
