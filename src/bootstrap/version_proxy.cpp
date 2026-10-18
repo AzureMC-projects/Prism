@@ -41,8 +41,8 @@ PRISM_FORWARD(DWORD, VerLanguageNameA, (DWORD language, LPSTR buffer, DWORD size
 PRISM_FORWARD(DWORD, VerLanguageNameW, (DWORD language, LPWSTR buffer, DWORD size), (language, buffer, size))
 PRISM_FORWARD(BOOL, VerQueryValueA, (LPCVOID block, LPCSTR subBlock, LPVOID* buffer, PUINT size), (block, subBlock, buffer, size))
 PRISM_FORWARD(BOOL, VerQueryValueW, (LPCVOID block, LPCWSTR subBlock, LPVOID* buffer, PUINT size), (block, subBlock, buffer, size))
-PRISM_FORWARD(BOOL, GetFileVersionInfoSizeExA, (DWORD flags, LPCSTR file, LPDWORD handle), (flags, file, handle))
-PRISM_FORWARD(BOOL, GetFileVersionInfoSizeExW, (DWORD flags, LPCWSTR file, LPDWORD handle), (flags, file, handle))
+PRISM_FORWARD(DWORD, GetFileVersionInfoSizeExA, (DWORD flags, LPCSTR file, LPDWORD handle), (flags, file, handle))
+PRISM_FORWARD(DWORD, GetFileVersionInfoSizeExW, (DWORD flags, LPCWSTR file, LPDWORD handle), (flags, file, handle))
 PRISM_FORWARD(BOOL, GetFileVersionInfoExA, (DWORD flags, LPCSTR file, DWORD handle, DWORD size, LPVOID data), (flags, file, handle, size, data))
 PRISM_FORWARD(BOOL, GetFileVersionInfoExW, (DWORD flags, LPCWSTR file, DWORD handle, DWORD size, LPVOID data), (flags, file, handle, size, data))
 #undef PRISM_FORWARD
@@ -52,8 +52,6 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
     DisableThreadLibraryCalls(instance);
     HANDLE thread = CreateThread(nullptr, 0, load_prism_runtime, nullptr, 0, nullptr);
     if (thread) CloseHandle(thread);
-  } else if (reason == DLL_PROCESS_DETACH) {
-    if (g_system_version) FreeLibrary(g_system_version);
   }
   return TRUE;
 }
