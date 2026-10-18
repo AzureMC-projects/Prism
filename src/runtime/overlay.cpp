@@ -81,6 +81,8 @@ void draw_overlay(HDC dc, int width, int height) {
   fill(dc, RECT{left, top, left + panelW, top + 74}, kPanelLight, 18);
   text(dc, left + 22, top + 15, L"PRISM", kText, 24, FW_BOLD);
   text(dc, left + 22, top + 45, L"Geometry Dash mod menu", kMuted, 13);
+  fill(dc, RECT{left + panelW - 142, top + 20, left + panelW - 60, top + 54}, kAccent, 8);
+  text(dc, left + panelW - 128, top + 29, L"UPDATE", kText, 12, FW_BOLD);
   text(dc, left + panelW - 40, top + 18, L"X", kText, 20, FW_BOLD);
 
   const bool safeMode = std::filesystem::exists(g_data_root / L"safe-mode.flag");
@@ -172,7 +174,11 @@ LRESULT CALLBACK overlay_proc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp) {
         const int left = std::max(12, (width - panelW) / 2);
         const int top = std::max(12, (height - panelH) / 2);
         if (x >= left + panelW - 55 && x <= left + panelW && y >= top && y <= top + 74) g_open = false;
-        else {
+        else if (x >= left + panelW - 142 && x <= left + panelW - 60 && y >= top + 20 && y <= top + 54) {
+          const auto updater = g_install_root / L"PrismUpdater.exe";
+          if (std::filesystem::exists(updater)) ShellExecuteW(nullptr, L"open", updater.c_str(), nullptr, g_install_root.c_str(), SW_SHOWNORMAL);
+          else log(LogLevel::warning, "PrismUpdater.exe is missing from the game folder.");
+        } else {
           const int listTop = top + 142, rowH = 34;
           const int visibleRows = std::max(1, (panelH - 218) / rowH);
           if (x >= left + 14 && x <= left + panelW - 14 && y >= listTop &&
