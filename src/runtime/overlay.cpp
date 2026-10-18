@@ -62,6 +62,17 @@ void fill(HDC dc, RECT r, COLORREF color, int radius = 10) {
   DeleteObject(brush);
   DeleteObject(pen);
 }
+void fill_polygon(HDC dc, const POINT* points, int count, COLORREF color) {
+  HBRUSH brush = CreateSolidBrush(color);
+  HPEN pen = CreatePen(PS_SOLID, 1, color);
+  HGDIOBJ oldBrush = SelectObject(dc, brush);
+  HGDIOBJ oldPen = SelectObject(dc, pen);
+  Polygon(dc, points, count);
+  SelectObject(dc, oldBrush);
+  SelectObject(dc, oldPen);
+  DeleteObject(brush);
+  DeleteObject(pen);
+}
 void draw_overlay(HDC dc, int width, int height) {
   RECT full{0, 0, width, height};
   HBRUSH clear = CreateSolidBrush(kTransparent);
@@ -70,7 +81,16 @@ void draw_overlay(HDC dc, int width, int height) {
 
   RECT button{std::max(8, width - 58), 12, std::max(50, width - 12), 58};
   fill(dc, button, kAccent, 12);
-  text(dc, button.left + 14, button.top + 8, L"P", kText, 25, FW_BOLD);
+  const POINT crystal[]{{button.left + 23, button.top + 7}, {button.left + 35, button.top + 20},
+      {button.left + 29, button.top + 34}, {button.left + 23, button.top + 39},
+      {button.left + 16, button.top + 34}, {button.left + 11, button.top + 20}};
+  fill_polygon(dc, crystal, 6, RGB(224, 233, 255));
+  const POINT leftFacet[]{{button.left + 23, button.top + 7}, {button.left + 23, button.top + 39},
+      {button.left + 16, button.top + 34}, {button.left + 11, button.top + 20}};
+  fill_polygon(dc, leftFacet, 4, RGB(94, 232, 255));
+  const POINT rightFacet[]{{button.left + 23, button.top + 7}, {button.left + 35, button.top + 20},
+      {button.left + 23, button.top + 25}};
+  fill_polygon(dc, rightFacet, 3, RGB(166, 136, 255));
   if (!g_open) return;
 
   const int panelW = std::min(560, std::max(360, width - 32));
