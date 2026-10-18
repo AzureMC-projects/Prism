@@ -1,2 +1,1 @@
-#include <windows.h>
-IDI_PRISM ICON "prism.ico"
+IDI_PRISM ICON "@PRISM_ICON_PATH@"
