@@ -16,7 +16,7 @@ Prism is a Windows-native mod-loader project for Geometry Dash 2.209, built arou
 
 - Windows x64 C++20 project built with CMake and MSVC.
 - Game-folder bootstrap intended to load Prism automatically when Geometry Dash starts, plus a lightweight in-game overlay with an F10 toggle.
-- Optional native launcher remains available for diagnostics; it is not the normal startup path.
+- The launcher executable remains a developer/debug utility; it is not installed or required for normal play.
 - Native DLL API v1 with load/unload callbacks and host logging.
 - Plugin scan with descriptor/API validation and duplicate-ID rejection.
 - Diagnostic log, best-effort minidump capture, and safe mode after an unhandled exception.
@@ -30,7 +30,7 @@ The installer targets the **folder containing GeometryDash.exe** and installs a 
 
 ## Uninstall
 
-Use **Windows Settings → Apps → Installed apps → Prism → Uninstall**, or choose **Uninstall Prism** from the Start menu. The uninstaller removes Prism's installed files and shortcuts. It does not intentionally delete Geometry Dash, saves, or unrelated files/mods in the mods folder; that folder is removed only if empty. Back up custom files before uninstalling as a general precaution.
+Use **Windows Settings → Apps → Installed apps → Prism → Uninstall**. The uninstaller removes Prism's installed files and shortcuts. It does not intentionally delete Geometry Dash, saves, or unrelated files/mods in the mods folder; that folder is removed only if empty. Back up custom files before uninstalling as a general precaution.
 
 ## Build
 
