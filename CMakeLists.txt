@@ -13,6 +13,7 @@ add_library(prism_runtime SHARED
   src/runtime/runtime.cpp
   src/runtime/logger.cpp
   src/runtime/plugin_manager.cpp
+  src/runtime/overlay.cpp
 )
 target_include_directories(prism_runtime PUBLIC include PRIVATE src/runtime)
 target_compile_definitions(prism_runtime PRIVATE PRISM_RUNTIME_EXPORTS WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
@@ -41,6 +42,12 @@ target_compile_options(prism_launcher PRIVATE /W4 /permissive- /EHsc)
 target_link_libraries(prism_launcher PRIVATE comdlg32 shell32)
 set_target_properties(prism_launcher PROPERTIES OUTPUT_NAME "PrismLauncher")
 
+# A local version.dll is loaded before the system copy when the game imports it.
+add_library(prism_bootstrap SHARED src/bootstrap/version_proxy.cpp src/bootstrap/version_proxy.def)
+target_compile_definitions(prism_bootstrap PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_compile_options(prism_bootstrap PRIVATE /W4 /permissive- /EHsc)
+set_target_properties(prism_bootstrap PROPERTIES OUTPUT_NAME "version")
+
 add_library(prism_sample_mod SHARED examples/hello_mod.cpp)
 target_include_directories(prism_sample_mod PRIVATE include)
 target_compile_definitions(prism_sample_mod PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
@@ -55,7 +62,7 @@ if(BUILD_TESTING)
   add_test(NAME prism_api_tests COMMAND prism_api_tests)
 endif()
 
-install(TARGETS prism_runtime prism_launcher prism_sample_mod
+install(TARGETS prism_runtime prism_launcher prism_sample_mod prism_bootstrap
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION bin
   ARCHIVE DESTINATION lib
