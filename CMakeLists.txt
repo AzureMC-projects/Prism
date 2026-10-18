@@ -62,6 +62,12 @@ foreach(xinput_version IN ITEMS 13 14)
   set_target_properties(prism_${xinput_name} PROPERTIES OUTPUT_NAME "${xinput_name}")
 endforeach()
 
+add_executable(prism_updater WIN32 src/updater/main.cpp)
+target_compile_definitions(prism_updater PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+target_compile_options(prism_updater PRIVATE /W4 /permissive- /EHsc)
+target_link_libraries(prism_updater PRIVATE urlmon shell32)
+set_target_properties(prism_updater PROPERTIES OUTPUT_NAME "PrismUpdater")
+
 add_library(prism_sample_mod SHARED examples/hello_mod.cpp)
 target_include_directories(prism_sample_mod PRIVATE include)
 target_compile_definitions(prism_sample_mod PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
@@ -76,7 +82,7 @@ if(BUILD_TESTING)
   add_test(NAME prism_api_tests COMMAND prism_api_tests)
 endif()
 
-install(TARGETS prism_runtime prism_launcher prism_sample_mod prism_bootstrap prism_xinput1_3 prism_xinput1_4
+install(TARGETS prism_runtime prism_launcher prism_sample_mod prism_bootstrap prism_xinput1_3 prism_xinput1_4 prism_updater
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION bin
   ARCHIVE DESTINATION lib
