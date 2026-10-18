@@ -15,7 +15,8 @@ Prism is a Windows-native mod-loader project for Geometry Dash 2.209, built arou
 ## Current implementation
 
 - Windows x64 C++20 project built with CMake and MSVC.
-- Native launcher with game executable selection, runtime-load action, mod enable/disable controls, log-folder shortcut, and safe-mode reset.
+- Game-folder bootstrap intended to load Prism automatically when Geometry Dash starts, plus a lightweight in-game overlay with an F10 toggle.
+- Optional native launcher remains available for diagnostics; it is not the normal startup path.
 - Native DLL API v1 with load/unload callbacks and host logging.
 - Plugin scan with descriptor/API validation and duplicate-ID rejection.
 - Diagnostic log, best-effort minidump capture, and safe mode after an unhandled exception.
@@ -23,9 +24,9 @@ Prism is a Windows-native mod-loader project for Geometry Dash 2.209, built arou
 
 ## Install into Geometry Dash
 
-The installer targets the **folder containing GeometryDash.exe** and places Prism's launcher/runtime and sample mod there, similar to the game-folder layout used by mod loaders. If Geometry Dash is installed in a custom Steam library, select that folder in the installer.
+The installer targets the **folder containing GeometryDash.exe** and installs a `version.dll` startup proxy, Prism runtime, and sample mod. After installation, start Geometry Dash normally through Steam; no separate launcher is intended to be required. Prism attempts to show a small `P` button over the game window. Press **F10** to toggle the menu. The overlay provides a mod list, enable/disable-by-file-rename controls, and shortcuts to the mods/log folders. Mod state changes apply after restarting the game.
 
-The installer copies files into the game folder; setup itself does **not** inject a DLL into a running game. Use Prism Launcher to attempt runtime loading after installation. Successful DLL loading alone does not prove game compatibility or create an in-game menu yet.
+**Compatibility note:** this startup mechanism uses a local `version.dll` proxy. If another `version.dll` already exists in the game folder, the installer refuses to overwrite it because two proxy loaders can conflict. The overlay is a native topmost window aligned over the game, not a hook into Geometry Dash's internal Cocos rendering engine. Test it against your game build and report issues before relying on it.
 
 ## Uninstall
 
