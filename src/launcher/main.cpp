@@ -1,5 +1,3 @@
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <commdlg.h>
@@ -184,15 +182,15 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
   if (msg == WM_CREATE) {
     CreateWindowW(L"STATIC", L"Prism", WS_CHILD | WS_VISIBLE, 24, 14, 340, 34, hwnd, nullptr, nullptr, nullptr);
     CreateWindowW(L"STATIC", L"Geometry Dash executable", WS_CHILD | WS_VISIBLE, 24, 52, 340, 22, hwnd, nullptr, nullptr, nullptr);
-    g_path = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 24, 76, 350, 26, hwnd, reinterpret_cast<HMENU>(kPath), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Browse…", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 386, 76, 100, 26, hwnd, reinterpret_cast<HMENU>(kBrowse), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Launch / Load Prism", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 112, 462, 34, hwnd, reinterpret_cast<HMENU>(kLaunch), nullptr, nullptr);
+    g_path = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 24, 76, 350, 26, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kPath)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Browse…", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 386, 76, 100, 26, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kBrowse)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Launch / Load Prism", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 112, 462, 34, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kLaunch)), nullptr, nullptr);
     CreateWindowW(L"STATIC", L"Mods (rename .dll to .dll.disabled to disable)", WS_CHILD | WS_VISIBLE, 24, 158, 462, 20, hwnd, nullptr, nullptr, nullptr);
-    g_mod_list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"", WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY, 24, 180, 462, 112, hwnd, reinterpret_cast<HMENU>(kMods), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Enable / Disable Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 304, 220, 30, hwnd, reinterpret_cast<HMENU>(kToggle), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Refresh", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 254, 304, 100, 30, hwnd, reinterpret_cast<HMENU>(kRefresh), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Open Logs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 364, 304, 122, 30, hwnd, reinterpret_cast<HMENU>(kOpenLogs), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Clear Safe Mode", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 346, 462, 30, hwnd, reinterpret_cast<HMENU>(kClearSafe), nullptr, nullptr);
+    g_mod_list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"", WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY, 24, 180, 462, 112, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kMods)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Enable / Disable Selected", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 304, 220, 30, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kToggle)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Refresh", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 254, 304, 100, 30, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kRefresh)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Open Logs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 364, 304, 122, 30, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kOpenLogs)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Clear Safe Mode", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 346, 462, 30, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kClearSafe)), nullptr, nullptr);
     CreateWindowW(L"STATIC", L"Native runtime foundation. In-game UI and game compatibility are not yet verified.", WS_CHILD | WS_VISIBLE, 24, 388, 480, 32, hwnd, nullptr, nullptr, nullptr);
     refresh_mods();
     return 0;
@@ -218,7 +216,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   wc.lpfnWndProc = window_proc;
   wc.hInstance = instance;
   wc.lpszClassName = cls;
-  wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+  wc.hCursor = LoadCursorW(nullptr, MAKEINTRESOURCEW(32512));
   wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
   if (!RegisterClassW(&wc)) return 1;
   HWND hwnd = CreateWindowExW(0, cls, L"Prism — Geometry Dash Mod Loader", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
