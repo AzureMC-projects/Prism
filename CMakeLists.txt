@@ -43,7 +43,7 @@ target_link_libraries(prism_launcher PRIVATE comdlg32 shell32)
 set_target_properties(prism_launcher PROPERTIES OUTPUT_NAME "PrismLauncher")
 
 # A local version.dll is loaded before the system copy when the game imports it.
-add_library(prism_bootstrap SHARED src/bootstrap/version_proxy.cpp src/bootstrap/version_proxy.def)
+add_library(prism_bootstrap SHARED src/bootstrap/version_proxy.cpp src/bootstrap/version_proxy.def "${CMAKE_BINARY_DIR}/prism.rc")
 target_compile_definitions(prism_bootstrap PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_compile_options(prism_bootstrap PRIVATE /W4 /permissive- /EHsc)
 set_target_properties(prism_bootstrap PROPERTIES OUTPUT_NAME "version")
