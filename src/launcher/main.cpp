@@ -183,7 +183,7 @@ LRESULT CALLBACK window_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     CreateWindowW(L"STATIC", L"Prism", WS_CHILD | WS_VISIBLE, 24, 14, 340, 34, hwnd, nullptr, nullptr, nullptr);
     CreateWindowW(L"STATIC", L"Geometry Dash executable", WS_CHILD | WS_VISIBLE, 24, 52, 340, 22, hwnd, nullptr, nullptr, nullptr);
     g_path = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 24, 76, 350, 26, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kPath)), nullptr, nullptr);
-    CreateWindowW(L"BUTTON", L"Browse…", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 386, 76, 100, 26, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kBrowse)), nullptr, nullptr);
+    CreateWindowW(L"BUTTON", L"Browse...", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 386, 76, 100, 26, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kBrowse)), nullptr, nullptr);
     CreateWindowW(L"BUTTON", L"Launch / Load Prism", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 24, 112, 462, 34, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kLaunch)), nullptr, nullptr);
     CreateWindowW(L"STATIC", L"Mods (rename .dll to .dll.disabled to disable)", WS_CHILD | WS_VISIBLE, 24, 158, 462, 20, hwnd, nullptr, nullptr, nullptr);
     g_mod_list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"", WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY, 24, 180, 462, 112, hwnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(kMods)), nullptr, nullptr);
@@ -219,7 +219,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   wc.hCursor = LoadCursorW(nullptr, MAKEINTRESOURCEW(32512));
   wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
   if (!RegisterClassW(&wc)) return 1;
-  HWND hwnd = CreateWindowExW(0, cls, L"Prism — Geometry Dash Mod Loader", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+  HWND hwnd = CreateWindowExW(0, cls, L"Prism - Geometry Dash Mod Loader", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
       CW_USEDEFAULT, CW_USEDEFAULT, 530, 475, nullptr, nullptr, instance, nullptr);
   if (!hwnd) return 1;
   ShowWindow(hwnd, show);
