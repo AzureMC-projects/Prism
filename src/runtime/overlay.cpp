@@ -128,6 +128,7 @@ void sync_position() {
   if (!g_game || !IsWindow(g_game) || !g_overlay) return;
   RECT r{};
   if (!GetClientRect(g_game, &r)) return;
+  if (IsIconic(g_game)) { ShowWindow(g_overlay, SW_HIDE); return; }
   POINT p{r.left, r.top};
   ClientToScreen(g_game, &p);
   SetWindowPos(g_overlay, HWND_TOPMOST, p.x, p.y, r.right - r.left, r.bottom - r.top,
