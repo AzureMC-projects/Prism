@@ -20,7 +20,19 @@ target_compile_options(prism_runtime PRIVATE /W4 /permissive- /EHsc)
 target_link_libraries(prism_runtime PRIVATE dbghelp)
 set_target_properties(prism_runtime PROPERTIES OUTPUT_NAME "PrismRuntime")
 
-add_executable(prism_launcher WIN32 src/launcher/main.cpp)
+# Generate a small native Windows icon from the source artwork. The generated ICO is
+# used by Explorer/taskbar and is also kept reproducible from the checked-in SVG brand.
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/scripts/generate_icon.py
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  RESULT_VARIABLE PRISM_ICON_RESULT
+)
+if(NOT PRISM_ICON_RESULT EQUAL 0)
+  message(FATAL_ERROR "Failed to generate Prism icon resources.")
+endif()
+
+add_executable(prism_launcher WIN32 src/launcher/main.cpp assets/prism.rc)
 target_compile_definitions(prism_launcher PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_compile_options(prism_launcher PRIVATE /W4 /permissive- /EHsc)
 target_link_libraries(prism_launcher PRIVATE comdlg32 shell32)
