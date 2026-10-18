@@ -32,7 +32,10 @@ if(NOT PRISM_ICON_RESULT EQUAL 0)
   message(FATAL_ERROR "Failed to generate Prism icon resources.")
 endif()
 
-add_executable(prism_launcher WIN32 src/launcher/main.cpp assets/prism.rc)
+set(PRISM_ICON_PATH "${CMAKE_SOURCE_DIR}/assets/prism.ico")
+configure_file(assets/prism.rc "${CMAKE_BINARY_DIR}/prism.rc" @ONLY)
+
+add_executable(prism_launcher WIN32 src/launcher/main.cpp "${CMAKE_BINARY_DIR}/prism.rc")
 target_compile_definitions(prism_launcher PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
 target_compile_options(prism_launcher PRIVATE /W4 /permissive- /EHsc)
 target_link_libraries(prism_launcher PRIVATE comdlg32 shell32)
