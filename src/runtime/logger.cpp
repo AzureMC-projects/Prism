@@ -1,6 +1,7 @@
 #include "logger.h"
 #include <Windows.h>
 #include <chrono>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <mutex>
