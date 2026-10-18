@@ -23,6 +23,7 @@ DirExistsWarning=no
 [Files]
 ; Install beside GeometryDash.exe. The local version.dll proxy attempts to load PrismRuntime at game startup.
 Source: "..\build\Release\PrismRuntime.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\build\Release\PrismUpdater.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\version.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\xinput1_3.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\Release\xinput1_4.dll"; DestDir: "{app}"; Flags: ignoreversion
